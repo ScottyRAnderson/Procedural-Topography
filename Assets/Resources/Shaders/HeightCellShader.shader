@@ -8,7 +8,7 @@ Shader "Custom/HeightCellShader"
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" "TerrainCompatible"="True"}
+        Tags { "RenderType"="Opaque" }
         LOD 200
 
         Pass
