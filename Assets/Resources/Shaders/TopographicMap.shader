@@ -2,13 +2,7 @@ Shader "Custom/TopographicMap"
 {
     Properties
     {
-        _SeaLevel ("Sea Level", range(0, 1)) = 0
-        _NumCells ("Num Cells", Integer) = 1
         _EdgeThreshold ("Edge Threshold", range(0, 1)) = 0
-
-        [Space]
-
-        _ContourWidth ("Contour Width", Float) = 1.0
         _ContourColor ("Contour Color", Color) = (1, 1, 1, 1)
 
         [Space]
@@ -43,7 +37,6 @@ Shader "Custom/TopographicMap"
             float4 _RenderTexture_TexelSize;
 
             float _EdgeThreshold;
-            float _ContourWidth;
             float4 _ContourColor;
 
             v2f vert(appdata_full v)
@@ -76,8 +69,6 @@ Shader "Custom/TopographicMap"
 
                 float sx = s00 + 2 * s10 + s20 - (s02 + 2 * s12 + s22);
                 float sy = s00 + 2 * s01 + s02 - (s20 + 2 * s21 + s22);
-                sx *= _ContourWidth;
-                sy *= _ContourWidth;
 
                 float g = sx * sx + sy * sy;
 
@@ -85,7 +76,7 @@ Shader "Custom/TopographicMap"
                     return _ContourColor;
                 }
 
-                return finalCol;
+                return 1;
             }
             ENDCG
         }

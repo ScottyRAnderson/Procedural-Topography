@@ -2,11 +2,12 @@ Shader "Custom/HeightCell"
 {
     Properties
     {
-        _SeaLevel ("Sea Level", range(0, 1)) = 0
         _NumCells ("Num Cells", Integer) = 1
-        _EdgeThreshold ("Edge Threshold", range(0, 1)) = 0
+        _ContourColor("Contour Color", Color) = (1, 1, 1, 1)
+
+        [Space]
+
         _HeightMap ("Height Map", 2D) = "white" {}
-        _RenderTexture ("Render Texture", 2D) = "white" {}
     }
     SubShader
     {
@@ -31,9 +32,8 @@ Shader "Custom/HeightCell"
             float4 _HeightMap_ST;
             float4 _HeightMap_TexelSize;
 
-            float _SeaLevel;
             int _NumCells;
-            float _EdgeThreshold;
+            float4 _ContourColor;
 
             v2f vert(appdata_full v)
             {
@@ -47,20 +47,20 @@ Shader "Custom/HeightCell"
             fixed4 frag(v2f i) : SV_Target
             {
                 float4 finalCol;
-
+                
                 // Cell shaded value
                 float height01 = tex2D(_HeightMap, i.uv);
                 finalCol = height01;
-
+                
                 float cellSize = 1.0 / _NumCells;
                 float height = 0;
-
+                
                 for (int c = 0; c < _NumCells; c++)
                 {
                     if (height > height01) {
                         break;
                     }
-
+                
                     height += cellSize;
                     finalCol = height;
                 }
