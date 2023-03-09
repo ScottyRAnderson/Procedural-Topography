@@ -65,7 +65,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints:
-    - _ContourWidth: 1
+    - _ContourWidth: 0
     m_Floats:
     - _BumpScale: 1
     - _ContourWidth: 1
@@ -82,7 +82,7 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _SeaLevel: 0.064
+    - _SeaLevel: 0.103
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1

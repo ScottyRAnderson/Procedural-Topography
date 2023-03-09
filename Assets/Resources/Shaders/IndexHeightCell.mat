@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: HeightCell
-  m_Shader: {fileID: 4800000, guid: 2f9687d5c2f55fc4e80ddcb6b5070e0f, type: 3}
+  m_Name: IndexHeightCell
+  m_Shader: {fileID: 4800000, guid: 5900cf3ff479c834ab45c83612518dcd, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -44,12 +44,8 @@ Material:
         m_Texture: {fileID: 2800000, guid: 488c57e7fce304245a53b7d1889dd773, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _HeightMapSharp:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 4500ce8cc8be22e4bbdf93b47c59ccd4, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -64,33 +60,20 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _Ramp:
-        m_Texture: {fileID: 2800000, guid: 578496b62537dec419cf7d0e246cee31, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _RenderTexture:
-        m_Texture: {fileID: 8400000, guid: d27ddeb2ed015d74c8b2f89e4b9b9f7b, type: 2}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     m_Ints:
     - _NumCells: 25
     m_Floats:
     - _BumpScale: 1
-    - _CellSize: 0.1
-    - _ContourWidth: 0.01
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _EdgeThreshold: 0.0005
     - _GlossMapScale: 1
-    - _Glossiness: 0
+    - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _Metallic: 0
     - _Mode: 0
-    - _NumCells: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _SeaLevel: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1

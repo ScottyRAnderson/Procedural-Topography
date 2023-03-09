@@ -13,3 +13,11 @@ float remap(float v, float minOld, float maxOld, float minNew, float maxNew) {
 float luminance(float3 color) {
 	return dot(lum, color);
 }
+
+// Returns the 'distance' between two colours.
+// 0 = The same colour
+float colorDistance(float3 colA, float3 colB)
+{
+	float3 delta = abs(colA - colB);
+	return length(delta);
+}

@@ -1,4 +1,4 @@
-Shader "Custom/HeightCell"
+Shader "Custom/IndexHeightCell"
 {
     Properties
     {
@@ -59,17 +59,17 @@ Shader "Custom/HeightCell"
                 
                 for (int c = 0; c < _NumCells; c++)
                 {
-                    if (c > 0 && (c + 1) % contourIndex == 0)
+                    if (c == 0 || (c + 1) % contourIndex == 0)
                     {
+                        if (height > height01) {
+                            break;
+                        }
+
+                        finalCol = height;
                         height += cellSize;
                         continue;
                     }
 
-                    if (height > height01) {
-                        break;
-                    }
-
-                    finalCol = height;
                     height += cellSize;
                 }
                 return finalCol;

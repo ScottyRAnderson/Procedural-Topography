@@ -41,7 +41,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _HeightMap:
-        m_Texture: {fileID: 2800000, guid: 0dc37812e232b3b45a3e9e9723fef34a, type: 3}
+        m_Texture: {fileID: 2800000, guid: 488c57e7fce304245a53b7d1889dd773, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
@@ -62,6 +62,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _RenderTexture:
         m_Texture: {fileID: 8400000, guid: d27ddeb2ed015d74c8b2f89e4b9b9f7b, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RenderTextureIndex:
+        m_Texture: {fileID: 8400000, guid: 2395f1d2eb6c02d4fa4aca310addc040, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints:

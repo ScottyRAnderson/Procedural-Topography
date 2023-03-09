@@ -9,6 +9,7 @@ Shader "Custom/TopographicMap"
 
         _HeightMap ("Height Map", 2D) = "white" {}
         _RenderTexture ("Render Texture", 2D) = "white" {}
+        _RenderTextureIndex ("Render Texture Index", 2D) = "white" {}
     }
     SubShader
     {
@@ -36,6 +37,9 @@ Shader "Custom/TopographicMap"
             sampler2D _RenderTexture;
             float4 _RenderTexture_TexelSize;
 
+            sampler2D _RenderTextureIndex;
+            float4 _RenderTextureIndex_TexelSize;
+
             float _EdgeThreshold;
             float4 _ContourColor;
 
@@ -50,8 +54,6 @@ Shader "Custom/TopographicMap"
 
             fixed4 frag(v2f i) : SV_Target
             {
-                float4 finalCol = tex2D(_HeightMap, i.uv);
-
                 // Edge detection
                 float2 uv = i.uv;
 
@@ -71,9 +73,33 @@ Shader "Custom/TopographicMap"
                 float sy = s00 + 2 * s01 + s02 - (s20 + 2 * s21 + s22);
 
                 float g = sx * sx + sy * sy;
-
                 if (g > _EdgeThreshold) {
                     return _ContourColor;
+                }
+
+
+
+
+
+
+                x = _RenderTexture_TexelSize.x;
+                y = _RenderTexture_TexelSize.y;
+
+                s00 = luminance(tex2D(_RenderTextureIndex, i.uv + float2(-x, y)));
+                s10 = luminance(tex2D(_RenderTextureIndex, i.uv + float2(-x, 0)));
+                s20 = luminance(tex2D(_RenderTextureIndex, i.uv + float2(-x, -y)));
+                s01 = luminance(tex2D(_RenderTextureIndex, i.uv + float2(0, y)));
+                s21 = luminance(tex2D(_RenderTextureIndex, i.uv + float2(0, -y)));
+                s02 = luminance(tex2D(_RenderTextureIndex, i.uv + float2(x, y)));
+                s12 = luminance(tex2D(_RenderTextureIndex, i.uv + float2(x, 0)));
+                s22 = luminance(tex2D(_RenderTextureIndex, i.uv + float2(x, -y)));
+
+                sx = s00 + 2 * s10 + s20 - (s02 + 2 * s12 + s22);
+                sy = s00 + 2 * s01 + s02 - (s20 + 2 * s21 + s22);
+
+                g = sx * sx + sy * sy;
+                if (g > _EdgeThreshold) {
+                    return float4(0, 1, 0, 1);
                 }
 
                 return 1;

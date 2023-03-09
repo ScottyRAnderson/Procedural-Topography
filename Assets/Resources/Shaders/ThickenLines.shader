@@ -73,9 +73,16 @@ Shader "Custom/ThickenLines"
 
             fixed4 frag(v2f i) : SV_Target
             {
-                float contourData = 1 - tex2D(_RenderTexture, i.uv);
+                float3 contours = tex2D(_RenderTexture, i.uv);
+                bool isIndexContour = colorDistance(contours, float3(0, 1, 0)) < .5;
+                bool isContour = colorDistance(contours, 0) < .5 || isIndexContour;
+
+                float contourData = isContour ? 1 : 0;
+                if (!isContour) {
+                    contours = 1;
+                }
+
                 float height01 = tex2D(_HeightMap, i.uv);
-                float4 contours = contourData;
 
                 // Edge detection
                 float2 uv = i.uv;
@@ -95,9 +102,7 @@ Shader "Custom/ThickenLines"
                     float s12 = luminance(tex2D(_RenderTexture, i.uv + float2(x, 0)));
                     float s22 = luminance(tex2D(_RenderTexture, i.uv + float2(x, -y)));
 
-                    if (s00 <= 0.05f || s10 <= 0.05f || s20 <= 0.05f || s01 <= 0.05f || s21 <= 0.05f || s02 <= 0.05f || s12 <= 0.05f || s22 <= 0.05f)
-                    {
-                        contours = _ContourColor;
+                    if (s00 <= 0.05f || s10 <= 0.05f || s20 <= 0.05f || s01 <= 0.05f || s21 <= 0.05f || s02 <= 0.05f || s12 <= 0.05f || s22 <= 0.05f){
                         contourData = 1;
                         break;
                     }
@@ -106,7 +111,7 @@ Shader "Custom/ThickenLines"
                     y += y;
                 }
 
-                float4 terrainCol = _ColorWater;
+                float4 terrainCol = 0;
                 if (height01 > _HighThreshold) {
                     terrainCol = _ColorTop;
                 }
@@ -119,7 +124,12 @@ Shader "Custom/ThickenLines"
                 else if (height01 > _SeaLevel) {
                     terrainCol = _ColorLow;
                 }
-                return lerp(terrainCol, contours, contourData * _ContourColor.a);
+                else {
+                    return _ColorWater;
+                }
+
+                float contourStrength = contourData * (isIndexContour ? 1 : _ContourColor.a);
+                return lerp(terrainCol, _ContourColor, contourStrength);
             }
             ENDCG
         }
