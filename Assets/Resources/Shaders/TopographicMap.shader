@@ -94,6 +94,7 @@ Shader "Custom/TopographicMap"
                         contourData.g = 0;
                     }
 
+                    // Increment sample width
                     x += x;
                     y += y;
                 }

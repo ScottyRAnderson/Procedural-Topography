@@ -4,7 +4,7 @@ using UnityEngine;
 using EasyButtons;
 
 [ExecuteInEditMode]
-public class TopographicMap : MonoBehaviour
+public class TopographicRenderer : MonoBehaviour
 {
     [SerializeField]
     private MapSettings mapSettings;
