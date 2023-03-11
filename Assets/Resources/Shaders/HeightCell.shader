@@ -3,10 +3,6 @@ Shader "Custom/HeightCell"
     Properties
     {
         _NumCells ("Num Cells", Integer) = 1
-        _ContourColor("Contour Color", Color) = (1, 1, 1, 1)
-
-        [Space]
-
         _HeightMap ("Height Map", 2D) = "white" {}
     }
     SubShader
@@ -29,11 +25,7 @@ Shader "Custom/HeightCell"
             };
 
             sampler2D _HeightMap;
-            float4 _HeightMap_ST;
-            float4 _HeightMap_TexelSize;
-
             int _NumCells;
-            float4 _ContourColor;
 
             static const int contourIndex = 5;
 
@@ -59,14 +51,14 @@ Shader "Custom/HeightCell"
                 
                 for (int c = 0; c < _NumCells; c++)
                 {
+                    if (height > height01) {
+                        break;
+                    }
+
                     if (c > 0 && (c + 1) % contourIndex == 0)
                     {
                         height += cellSize;
                         continue;
-                    }
-
-                    if (height > height01) {
-                        break;
                     }
 
                     finalCol = height;

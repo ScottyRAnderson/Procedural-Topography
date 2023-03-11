@@ -21,3 +21,13 @@ float colorDistance(float3 colA, float3 colB)
 	float3 delta = abs(colA - colB);
 	return length(delta);
 }
+
+// Convert colour to linear colour space
+float4 toLinear(float4 col) {
+	return pow(col, 2.2);
+}
+
+// Convert colour to gamma colour space
+float4 toGamma(float4 col) {
+	return pow(col, 0.4545);
+}

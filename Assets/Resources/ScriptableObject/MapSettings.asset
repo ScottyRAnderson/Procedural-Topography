@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 933e8ed15114db042852cef5598bba39, type: 3}
+  m_Name: MapSettings
+  m_EditorClassIdentifier: 
+  cellCount: 25
+  contourThreshold: 0
+  contourSmooth: 25
+  contourWidth: 1
+  indexContour: 5
+  contourColor: {r: 0.65882355, g: 0.54901963, b: 0.41960785, a: 0.36078432}
+  mapLayers:
+  - threshold: 0.1
+    layerColor: {r: 0.8313726, g: 0.8980393, b: 0.8588236, a: 1}
+  - threshold: 0.12
+    layerColor: {r: 0.9960785, g: 0.9921569, b: 0.9725491, a: 1}
+  - threshold: 0.2
+    layerColor: {r: 0.9333334, g: 0.92549026, b: 0.73333335, a: 1}
+  - threshold: 0.34
+    layerColor: {r: 0.7372549, g: 0.7686275, b: 0.48235297, a: 1}
+  - threshold: 1
+    layerColor: {r: 0.85098046, g: 0.86666673, b: 0.627451, a: 1}
