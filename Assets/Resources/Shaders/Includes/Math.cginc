@@ -9,12 +9,12 @@ float remap(float v, float minOld, float maxOld, float minNew, float maxNew) {
 	return minNew + (v - minOld) * (maxNew - minNew) / (maxOld - minOld);
 }
 
-// Approximates the brightness of a RGB value. 
+// Approximates the brightness of a RGB value
 float luminance(float3 color) {
 	return dot(lum, color);
 }
 
-// Returns the 'distance' between two colours.
+// Returns the 'distance' between two colours
 // 0 = The same colour
 float colorDistance(float3 colA, float3 colB)
 {

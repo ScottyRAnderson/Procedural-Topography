@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 933e8ed15114db042852cef5598bba39, type: 3}
   m_Name: MapSettings
   m_EditorClassIdentifier: 
+  debugMode: 4
   cellCount: 25
   contourThreshold: 0
   contourSmooth: 25

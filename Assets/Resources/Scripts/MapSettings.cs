@@ -5,6 +5,20 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Topography/MapSettings", fileName = "MapSettings")]
 public class MapSettings : ScriptableObject
 {
+    public enum MapDebugMode
+    {
+        CellMap = 0,
+        IndexCellMap = 1,
+        ContourMap = 2,
+        ColorMap = 3,
+        None = 4
+    }
+
+    [SerializeField]
+    private MapDebugMode debugMode = MapDebugMode.None;
+
+    [Space]
+
     [SerializeField]
     private int cellCount = 10;
     [SerializeField][Range(0f, 1f)]
@@ -22,6 +36,8 @@ public class MapSettings : ScriptableObject
 
     [SerializeField]
     private MapLayer[] mapLayers;
+
+    public MapDebugMode DebugMode { get { return debugMode; } }
 
     public int CellCount { get { return cellCount; } }
     public float ContourThreshold { get { return contourThreshold; } }

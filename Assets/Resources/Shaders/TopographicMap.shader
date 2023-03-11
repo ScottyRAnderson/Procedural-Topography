@@ -1,17 +1,6 @@
 Shader "Custom/TopographicMap"
 {
-    Properties
-    {
-        _EdgeThreshold ("Edge Threshold", range(0, 1)) = 0
-        _ContourWidth("Contour Width", Integer) = 1
-        _ContourColor ("Contour Color", Color) = (1, 1, 1, 1)
-
-        [Space]
-
-        _HeightMap ("Height Map", 2D) = "white" {}
-        _RenderTexture ("Render Texture", 2D) = "white" {}
-        _RenderTextureIndex ("Render Texture Index", 2D) = "white" {}
-    }
+    Properties { }
     SubShader
     {
         Tags { "RenderType" = "Opaque" }
@@ -28,103 +17,132 @@ Shader "Custom/TopographicMap"
             {
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
-                float4 worldPos : TEXCOORD1;
             };
 
-            sampler2D _HeightMap;
+            sampler2D heightMap;
+            sampler2D cellData;
+            float4 cellData_TexelSize;
 
-            sampler2D _RenderTexture;
-            float4 _RenderTexture_TexelSize;
-
-            sampler2D _RenderTextureIndex;
-            float4 _RenderTextureIndex_TexelSize;
-
-            float _EdgeThreshold;
-            float4 _ContourColor;
-            int _ContourWidth;
+            float contourThreshold;
+            int contourWidth;
+            float4 contourColor;
 
             int numMapLayers;
             float mapThresholds[20];
             float4 mapLayers[20];
 
+            int debugMode;
+
             v2f vert(appdata_full v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.worldPos = mul(unity_ObjectToWorld, v.vertex);
                 o.uv = v.texcoord.xy;
+                o.vertex = UnityObjectToClipPos(v.vertex);
                 return o;
             }
 
-            fixed4 frag(v2f i) : SV_Target
+            // Identify contour lines through edge detection
+            // Implements Sobel Opertor edge detection
+            // Implementation Reference: https://homepages.inf.ed.ac.uk/rbf/HIPR2/sobel.htm
+            float2 findContours(float2 uv)
             {
-                // Edge detection
-                float3 contourCol = 1;
-
-                float x = _RenderTexture_TexelSize.x;
-                float y = _RenderTexture_TexelSize.y;
-
-                int width = min(_ContourWidth, 100);
-                for (int w = 0; w < width; w++)
+                float2 contourData = 1;
+                float x = cellData_TexelSize.x;
+                float y = cellData_TexelSize.y;
+                for (int w = 0; w < contourWidth; w++)
                 {
-                    float s00 = luminance(tex2D(_RenderTexture, i.uv + float2(-x, y)));
-                    float s10 = luminance(tex2D(_RenderTexture, i.uv + float2(-x, 0)));
-                    float s20 = luminance(tex2D(_RenderTexture, i.uv + float2(-x, -y)));
-                    float s01 = luminance(tex2D(_RenderTexture, i.uv + float2(0, y)));
-                    float s21 = luminance(tex2D(_RenderTexture, i.uv + float2(0, -y)));
-                    float s02 = luminance(tex2D(_RenderTexture, i.uv + float2(x, y)));
-                    float s12 = luminance(tex2D(_RenderTexture, i.uv + float2(x, 0)));
-                    float s22 = luminance(tex2D(_RenderTexture, i.uv + float2(x, -y)));
-
+                    float4 cell00 = tex2D(cellData, uv + float2(-x, y));
+                    float4 cell01 = tex2D(cellData, uv + float2(-x, 0));
+                    float4 cell02 = tex2D(cellData, uv + float2(-x, -y));
+                    float4 cell03 = tex2D(cellData, uv + float2(0, y));
+                    float4 cell04 = tex2D(cellData, uv + float2(0, -y));
+                    float4 cell05 = tex2D(cellData, uv + float2(x, y));
+                    float4 cell06 = tex2D(cellData, uv + float2(x, 0));
+                    float4 cell07 = tex2D(cellData, uv + float2(x, -y));
+                    
+                    // Evaluate red channel edges
+                    float s00 = luminance(cell00.r);
+                    float s10 = luminance(cell01.r);
+                    float s20 = luminance(cell02.r);
+                    float s01 = luminance(cell03.r);
+                    float s21 = luminance(cell04.r);
+                    float s02 = luminance(cell05.r);
+                    float s12 = luminance(cell06.r);
+                    float s22 = luminance(cell07.r);
+                    
                     float sx = s00 + 2 * s10 + s20 - (s02 + 2 * s12 + s22);
                     float sy = s00 + 2 * s01 + s02 - (s20 + 2 * s21 + s22);
-
                     float g = sx * sx + sy * sy;
-                    if (g > _EdgeThreshold) {
-                        contourCol = _ContourColor;
+                    if (g > contourThreshold) {
+                        contourData.r = 0;
                     }
-
-                    s00 = luminance(tex2D(_RenderTextureIndex, i.uv + float2(-x, y)));
-                    s10 = luminance(tex2D(_RenderTextureIndex, i.uv + float2(-x, 0)));
-                    s20 = luminance(tex2D(_RenderTextureIndex, i.uv + float2(-x, -y)));
-                    s01 = luminance(tex2D(_RenderTextureIndex, i.uv + float2(0, y)));
-                    s21 = luminance(tex2D(_RenderTextureIndex, i.uv + float2(0, -y)));
-                    s02 = luminance(tex2D(_RenderTextureIndex, i.uv + float2(x, y)));
-                    s12 = luminance(tex2D(_RenderTextureIndex, i.uv + float2(x, 0)));
-                    s22 = luminance(tex2D(_RenderTextureIndex, i.uv + float2(x, -y)));
-
+                    
+                    // Evaluate green channel edges
+                    s00 = luminance(cell00.g);
+                    s10 = luminance(cell01.g);
+                    s20 = luminance(cell02.g);
+                    s01 = luminance(cell03.g);
+                    s21 = luminance(cell04.g);
+                    s02 = luminance(cell05.g);
+                    s12 = luminance(cell06.g);
+                    s22 = luminance(cell07.g);
+                    
                     sx = s00 + 2 * s10 + s20 - (s02 + 2 * s12 + s22);
                     sy = s00 + 2 * s01 + s02 - (s20 + 2 * s21 + s22);
-
                     g = sx * sx + sy * sy;
-                    if (g > _EdgeThreshold) {
-                        contourCol = float4(0, 1, 0, 1);
+                    if (g > contourThreshold) {
+                        contourData.g = 0;
                     }
 
                     x += x;
                     y += y;
                 }
+                return contourData;
+            }
 
-                bool isIndexContour = colorDistance(contourCol, float3(0, 1, 0)) < .5;
-                bool isContour = colorDistance(contourCol, 0) < .5 || isIndexContour;
+            fixed4 frag(v2f i) : SV_Target
+            {
+                // Identify contour lines
+                float2 contourData = findContours(i.uv);
 
-                float contourData = isContour ? 1 : 0;
-                float height01 = tex2D(_HeightMap, i.uv);
+                // Unpack contour data
+                bool isIndexContour = contourData.g < 1;
+                bool isContour = contourData.r < 1 || isIndexContour;
 
+                // Get map colour
                 float4 terrainCol = 0;
+                float mapHeight = tex2D(heightMap, i.uv);
                 for (int l = 0; l < numMapLayers; l++)
                 {
                     float threshold = mapThresholds[l];
                     float4 col = toLinear(mapLayers[l]);
-                    if (height01 <= threshold)
+                    if (mapHeight <= threshold)
                     {
                         terrainCol = col;
                         break;
                     }
                 }
 
-                float contourStrength = contourData * (isIndexContour ? 1 : _ContourColor.a);
-                return lerp(terrainCol, _ContourColor, contourStrength);
+                // Handle debugging
+                switch (debugMode)
+                {
+                    case 0:
+                        return tex2D(cellData, i.uv).r;
+                        break;
+                    case 1:
+                        return tex2D(cellData, i.uv).g;
+                        break;
+                    case 2:
+                        return luminance(float3(contourData, 0));
+                        break;
+                    case 3:
+                        return terrainCol;
+                        break;
+                }
+
+                // Attenuate contour lines based on if it's an index or not
+                float contourStrength = (isContour ? 1 : 0) * (isIndexContour ? 1 : contourColor.a);
+                return lerp(terrainCol, toLinear(contourColor), contourStrength);
             }
             ENDCG
         }

@@ -1,10 +1,6 @@
 Shader "Custom/HeightCell"
 {
-    Properties
-    {
-        _NumCells ("Num Cells", Integer) = 1
-        _HeightMap ("Height Map", 2D) = "white" {}
-    }
+    Properties { }
     SubShader
     {
         Tags { "RenderType" = "Opaque" }
@@ -15,56 +11,53 @@ Shader "Custom/HeightCell"
             #pragma fragment frag
 
             #include "UnityCG.cginc"
-            #include "./Includes/Math.cginc"
 
             struct v2f
             {
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
-                float4 worldPos : TEXCOORD1;
             };
 
-            sampler2D _HeightMap;
-            int _NumCells;
-
-            static const int contourIndex = 5;
+            sampler2D heightMap;
+            int cellCount;
+            int indexContour;
 
             v2f vert(appdata_full v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.worldPos = mul(unity_ObjectToWorld, v.vertex);
                 o.uv = v.texcoord.xy;
+                o.vertex = UnityObjectToClipPos(v.vertex);
                 return o;
             }
 
             fixed4 frag(v2f i) : SV_Target
             {
-                float4 finalCol;
-                
-                // Cell shaded value
-                float height01 = tex2D(_HeightMap, i.uv);
-                finalCol = height01;
-                
-                float cellSize = 1.0 / _NumCells;
+                // Cell shade the original map
+                float mapHeight = tex2D(heightMap, i.uv);
+                float4 cellData = 0;
+
                 float height = 0;
-                
-                for (int c = 0; c < _NumCells; c++)
+                float cellSize = 1.0 / cellCount;
+                for (int c = 0; c < cellCount; c++)
                 {
-                    if (height > height01) {
+                    if (height > mapHeight) {
                         break;
                     }
 
-                    if (c > 0 && (c + 1) % contourIndex == 0)
-                    {
-                        height += cellSize;
-                        continue;
+                    // Pack index contours into their own colour channel
+                    if (c == 0){
+                        cellData.rg = height;
+                    }
+                    else if ((c + 1) % indexContour == 0){
+                        cellData.g = height;
+                    }
+                    else{
+                        cellData.r = height;
                     }
 
-                    finalCol = height;
                     height += cellSize;
                 }
-                return finalCol;
+                return cellData;
             }
             ENDCG
         }
