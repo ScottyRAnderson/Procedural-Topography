@@ -13,20 +13,23 @@ MonoBehaviour:
   m_Name: MapSettings
   m_EditorClassIdentifier: 
   debugMode: 4
-  cellCount: 25
-  contourThreshold: 0
-  contourSmooth: 25
+  cellCount: 21
+  edgeThreshold: 0
+  contourThreshold: 0.051
   contourWidth: 1
-  indexContour: 5
   contourColor: {r: 0.65882355, g: 0.54901963, b: 0.41960785, a: 0.36078432}
+  indexContour: 5
+  indexStrength: 0.8
   mapLayers:
-  - threshold: 0.1
+  - threshold: 0.051
     layerColor: {r: 0.8313726, g: 0.8980393, b: 0.8588236, a: 1}
-  - threshold: 0.12
+  - threshold: 0.076
     layerColor: {r: 0.9960785, g: 0.9921569, b: 0.9725491, a: 1}
-  - threshold: 0.2
+  - threshold: 0.171
     layerColor: {r: 0.9333334, g: 0.92549026, b: 0.73333335, a: 1}
-  - threshold: 0.34
+  - threshold: 0.307
+    layerColor: {r: 0.56078434, g: 0.65882355, b: 0.5137255, a: 1}
+  - threshold: 0.563
     layerColor: {r: 0.7372549, g: 0.7686275, b: 0.48235297, a: 1}
   - threshold: 1
     layerColor: {r: 0.85098046, g: 0.86666673, b: 0.627451, a: 1}

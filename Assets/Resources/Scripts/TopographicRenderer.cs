@@ -1,9 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using EasyButtons;
 
-[ExecuteInEditMode]
+[ExecuteInEditMode][RequireComponent(typeof(Camera))]
 public class TopographicRenderer : MonoBehaviour
 {
     [SerializeField]
@@ -11,42 +10,43 @@ public class TopographicRenderer : MonoBehaviour
     [SerializeField]
     private Texture2D heightMap;
     [SerializeField]
-    private Texture2D heightMapFull;
-
-    [Space]
-
-    [SerializeField]
-    private Shader contourShader;
-    [SerializeField]
-    private Shader topograhicShader;
+    private Texture2D blurredMap;
 
     private Material contourMat;
     private Material topographicMat;
 
-    private void OnRenderImage(RenderTexture initialSource, RenderTexture finalDestination)
+    private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
         BuildMaterials();
-        RenderTexture contourTex = TemporaryRenderTexture(initialSource);
-        Graphics.Blit(initialSource, contourTex, contourMat);
+        RenderTexture contourTex = TemporaryRenderTexture(source);
+        Graphics.Blit(source, contourTex, contourMat);
 
         topographicMat.SetTexture("cellData", contourTex);
         RenderTexture.ReleaseTemporary(contourTex);
-        Graphics.Blit(initialSource, finalDestination, topographicMat);
+        Graphics.Blit(source, destination, topographicMat);
     }
 
     private void BuildMaterials()
     {
-        contourMat = new Material(contourShader);
-        contourMat.SetTexture("heightMap", heightMap);
+        if(contourMat == null){
+            contourMat = new Material(Shader.Find("Custom/HeightCell"));
+        }
+        contourMat.SetTexture("heightMap", blurredMap);
         contourMat.SetInteger("cellCount", mapSettings.CellCount);
         contourMat.SetInteger("indexContour", mapSettings.IndexContour);
 
-        topographicMat = new Material(topograhicShader);
+        if(topographicMat == null){
+            topographicMat = new Material(Shader.Find("Custom/TopographicMap"));
+        }
         topographicMat.SetInteger("debugMode", (int)mapSettings.DebugMode);
+        topographicMat.SetFloat("edgeThreshold", mapSettings.EdgeThreshold);
+
         topographicMat.SetFloat("contourThreshold", mapSettings.ContourThreshold);
         topographicMat.SetInteger("contourWidth", mapSettings.ContourWidth);
         topographicMat.SetColor("contourColor", mapSettings.ContourColor);
-        topographicMat.SetTexture("heightMap", heightMapFull);
+
+        topographicMat.SetFloat("indexStrength", mapSettings.IndexStrength);
+        topographicMat.SetTexture("heightMap", heightMap);
 
         MapLayer[] mapLayers = mapSettings.MapLayers;
         float[] mapThresholds = new float[20];

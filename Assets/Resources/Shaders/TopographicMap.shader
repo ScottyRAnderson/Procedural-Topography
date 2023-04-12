@@ -23,9 +23,11 @@ Shader "Custom/TopographicMap"
             sampler2D cellData;
             float4 cellData_TexelSize;
 
+            float edgeThreshold;
             float contourThreshold;
-            int contourWidth;
             float4 contourColor;
+            int contourWidth;
+            float indexStrength;
 
             int numMapLayers;
             float mapThresholds[20];
@@ -73,7 +75,7 @@ Shader "Custom/TopographicMap"
                     float sx = s00 + 2 * s10 + s20 - (s02 + 2 * s12 + s22);
                     float sy = s00 + 2 * s01 + s02 - (s20 + 2 * s21 + s22);
                     float g = sx * sx + sy * sy;
-                    if (g > contourThreshold) {
+                    if (g > edgeThreshold) {
                         contourData.r = 0;
                     }
                     
@@ -90,7 +92,7 @@ Shader "Custom/TopographicMap"
                     sx = s00 + 2 * s10 + s20 - (s02 + 2 * s12 + s22);
                     sy = s00 + 2 * s01 + s02 - (s20 + 2 * s21 + s22);
                     g = sx * sx + sy * sy;
-                    if (g > contourThreshold) {
+                    if (g > edgeThreshold) {
                         contourData.g = 0;
                     }
 
@@ -142,7 +144,7 @@ Shader "Custom/TopographicMap"
                 }
 
                 // Attenuate contour lines based on if it's an index or not
-                float contourStrength = (isContour ? 1 : 0) * (isIndexContour ? 1 : contourColor.a);
+                float contourStrength = ((isContour ? 1 : 0) * (isIndexContour ? indexStrength : contourColor.a)) * (mapHeight < contourThreshold ? 0 : 1);
                 return lerp(terrainCol, toLinear(contourColor), contourStrength);
             }
             ENDCG

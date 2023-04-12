@@ -1,6 +1,10 @@
 static const float maxFloat = 3.402823466e+38;
 static const float3 lum = float3(0.2126, 0.7152, 0.0722);
 
+// Min-max terrain elevation on Earth
+static const float minElevation = -10916;
+static const float maxElevation = 8848;
+
 float remap01(float a, float b, float t) {
 	return (t - a) / (b - a);
 }
