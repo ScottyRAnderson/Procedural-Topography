@@ -36,6 +36,8 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
             // Determine the weights
             weight = gauss(x, y, sigma);
+
+            // Sample from the height map making sure to convert from linear to gamma output
             float4 heightSample = toGamma(abs(heightMap.SampleLevel(sampler_heightMap, uvOffset, 0)));
             o += heightSample * weight;
             sum += weight;
