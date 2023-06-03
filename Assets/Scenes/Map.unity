@@ -219,6 +219,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c0f306df3463f9498b4e9bfee60af38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gaussianCompute: {fileID: 7200000, guid: c4f8fc8e91e74ad43b51b846a32998f5, type: 3}
   mapSettings: {fileID: 11400000, guid: 6cc0cf9bd0c89e44990564c1c31f4b56, type: 2}
   heightMap: {fileID: 2800000, guid: 1b02eee773bf16644931088d9f5141b5, type: 3}
-  blurredMap: {fileID: 2800000, guid: 5e0f08081dd36f54fb92d02e8700193f, type: 3}

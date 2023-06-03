@@ -23,6 +23,8 @@ public class MapSettings : ScriptableObject
     private int cellCount = 10;
     [SerializeField][Range(0f, 1f)]
     private float edgeThreshold;
+    [SerializeField]
+    private float edgeSmoothness;
 
     [Space]
 
@@ -49,6 +51,7 @@ public class MapSettings : ScriptableObject
 
     public int CellCount { get { return cellCount; } }
     public float EdgeThreshold { get { return edgeThreshold; } }
+    public float EdgeSmoothness { get { return edgeSmoothness; } }
 
     public float ContourThreshold { get { return contourThreshold; } }
     public int ContourWidth { get { return contourWidth; } }
@@ -62,6 +65,7 @@ public class MapSettings : ScriptableObject
     private void OnValidate()
     {
         cellCount = Mathf.Max(cellCount, 1);
+        edgeSmoothness = Mathf.Max(edgeSmoothness, 0f);
         contourWidth = Mathf.Max(contourWidth, 0);
         indexContour = Mathf.Max(indexContour, 0);
         if(mapLayers.Length > 20){

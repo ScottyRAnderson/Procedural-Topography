@@ -1,3 +1,4 @@
+static const float PI = 3.1415926538f;
 static const float maxFloat = 3.402823466e+38;
 static const float3 lum = float3(0.2126, 0.7152, 0.0722);
 

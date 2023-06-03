@@ -6,24 +6,49 @@ using UnityEngine;
 public class TopographicRenderer : MonoBehaviour
 {
     [SerializeField]
+    private ComputeShader gaussianCompute;
+    [SerializeField]
     private MapSettings mapSettings;
     [SerializeField]
     private Texture2D heightMap;
-    [SerializeField]
-    private Texture2D blurredMap;
 
+    private RenderTexture blurTex;
     private Material contourMat;
     private Material topographicMat;
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        BuildMaterials();
-        RenderTexture contourTex = TemporaryRenderTexture(source);
-        Graphics.Blit(source, contourTex, contourMat);
+        if(blurTex != null) {
+            Graphics.Blit(blurTex, destination);
+        }
+        else {
+            Graphics.Blit(source, destination);
+        }
 
-        topographicMat.SetTexture("cellData", contourTex);
-        RenderTexture.ReleaseTemporary(contourTex);
-        Graphics.Blit(source, destination, topographicMat);
+        //BuildMaterials();
+
+        //contourMat.SetTexture("heightMap", blurTex);
+        //RenderTexture contourTex = TemporaryRenderTexture(source);
+        //Graphics.Blit(source, contourTex, contourMat);
+        //
+        //topographicMat.SetTexture("cellData", contourTex);
+        //RenderTexture.ReleaseTemporary(contourTex);
+        //Graphics.Blit(source, destination, topographicMat);
+    }
+
+    public void UpdateBlurTexture()
+    {
+        blurTex = new RenderTexture(1080, 1080, 24);
+        blurTex.enableRandomWrite = true;
+        blurTex.Create();
+
+        Vector4 heightMap_TexelSize = new Vector4(1.0f / heightMap.width, 1.0f / heightMap.height, heightMap.width, heightMap.height);
+
+        gaussianCompute.SetTexture(0, "result", blurTex);
+        gaussianCompute.SetTexture(0, "heightMap", heightMap);
+        gaussianCompute.SetVector("heightMap_TexelSize", heightMap_TexelSize);
+        gaussianCompute.SetFloat("resolution", blurTex.width);
+        gaussianCompute.Dispatch(0, blurTex.width / 8, blurTex.height / 8, 1);
     }
 
     private void BuildMaterials()
@@ -31,7 +56,6 @@ public class TopographicRenderer : MonoBehaviour
         if(contourMat == null){
             contourMat = new Material(Shader.Find("Custom/HeightCell"));
         }
-        contourMat.SetTexture("heightMap", blurredMap);
         contourMat.SetInteger("cellCount", mapSettings.CellCount);
         contourMat.SetInteger("indexContour", mapSettings.IndexContour);
 
