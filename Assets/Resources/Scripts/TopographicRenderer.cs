@@ -35,6 +35,7 @@ public class TopographicRenderer : MonoBehaviour
 
     private void OnValidate() {
         kernelSize = Mathf.Max(0, kernelSize);
+        UpdateBlurTexture();
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)

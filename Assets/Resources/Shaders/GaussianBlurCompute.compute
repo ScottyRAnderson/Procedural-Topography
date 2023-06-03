@@ -31,13 +31,13 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         {
             // Calculate the offset
             uvOffset = coord;
-
             uvOffset.x += heightMap_TexelSize.x * x;
             uvOffset.y += heightMap_TexelSize.y * y;
 
             // Determine the weights
             weight = gauss(x, y, sigma);
-            o += heightMap.SampleLevel(sampler_heightMap, uvOffset, 0) * weight;
+            float4 heightSample = toGamma(abs(heightMap.SampleLevel(sampler_heightMap, uvOffset, 0)));
+            o += heightSample * weight;
             sum += weight;
         }
     }

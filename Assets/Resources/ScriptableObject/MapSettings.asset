@@ -16,7 +16,7 @@ MonoBehaviour:
   cellCount: 21
   edgeThreshold: 0
   edgeSmoothness: 100
-  contourThreshold: 0
+  contourThreshold: 0.055
   contourWidth: 1
   contourColor: {r: 0.65882355, g: 0.54901963, b: 0.41960785, a: 0.36078432}
   indexContour: 5
