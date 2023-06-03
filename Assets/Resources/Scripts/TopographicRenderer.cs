@@ -5,61 +5,89 @@ using UnityEngine;
 [ExecuteInEditMode][RequireComponent(typeof(Camera))]
 public class TopographicRenderer : MonoBehaviour
 {
-    [SerializeField]
-    private ComputeShader gaussianCompute;
+    public enum ComputeResolution
+    {
+        Res_256 = 256,
+        Res_1080 = 1080,
+        Res_1920 = 1920,
+        Res_2560 = 2560,
+        Res_3840 = 3840
+    }
+
     [SerializeField]
     private MapSettings mapSettings;
     [SerializeField]
     private Texture2D heightMap;
+    [SerializeField]
+    private ComputeShader gaussianCompute;
+    [SerializeField]
+    private ComputeResolution computeResolution = ComputeResolution.Res_1080;
+    [SerializeField]
+    private int kernelSize = 27;
 
-    private RenderTexture blurTex;
     private Material contourMat;
     private Material topographicMat;
+    private RenderTexture blurTex;
+
+    private void Awake() {
+        UpdateBlurTexture();
+    }
+
+    private void OnValidate() {
+        kernelSize = Mathf.Max(0, kernelSize);
+    }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        if(blurTex != null) {
+        if (mapSettings == null) {
+            return;
+        }
+
+        if (mapSettings.DebugMode == MapSettings.MapDebugMode.BlurMap) {
+            if (blurTex == null) {
+                UpdateBlurTexture();
+            }
             Graphics.Blit(blurTex, destination);
-        }
-        else {
-            Graphics.Blit(source, destination);
+            return;
         }
 
-        //BuildMaterials();
+        BuildMaterials();
 
-        //contourMat.SetTexture("heightMap", blurTex);
-        //RenderTexture contourTex = TemporaryRenderTexture(source);
-        //Graphics.Blit(source, contourTex, contourMat);
-        //
-        //topographicMat.SetTexture("cellData", contourTex);
-        //RenderTexture.ReleaseTemporary(contourTex);
-        //Graphics.Blit(source, destination, topographicMat);
+        contourMat.SetTexture("heightMap", blurTex);
+        RenderTexture contourTex = TemporaryRenderTexture(source);
+        Graphics.Blit(source, contourTex, contourMat);
+        
+        topographicMat.SetTexture("cellData", contourTex);
+        RenderTexture.ReleaseTemporary(contourTex);
+        Graphics.Blit(source, destination, topographicMat);
     }
 
     public void UpdateBlurTexture()
     {
-        blurTex = new RenderTexture(1080, 1080, 24);
+        int resolution = (int)computeResolution;
+        blurTex = new RenderTexture(resolution, resolution, 24);
         blurTex.enableRandomWrite = true;
         blurTex.Create();
 
         Vector4 heightMap_TexelSize = new Vector4(1.0f / heightMap.width, 1.0f / heightMap.height, heightMap.width, heightMap.height);
-
         gaussianCompute.SetTexture(0, "result", blurTex);
         gaussianCompute.SetTexture(0, "heightMap", heightMap);
         gaussianCompute.SetVector("heightMap_TexelSize", heightMap_TexelSize);
         gaussianCompute.SetFloat("resolution", blurTex.width);
+        gaussianCompute.SetInt("kernelSize", kernelSize / 2);
+        gaussianCompute.SetFloat("sigma", mapSettings.EdgeSmoothness);
         gaussianCompute.Dispatch(0, blurTex.width / 8, blurTex.height / 8, 1);
     }
 
     private void BuildMaterials()
     {
-        if(contourMat == null){
+        if(contourMat == null) {
             contourMat = new Material(Shader.Find("Custom/HeightCell"));
         }
         contourMat.SetInteger("cellCount", mapSettings.CellCount);
         contourMat.SetInteger("indexContour", mapSettings.IndexContour);
 
-        if(topographicMat == null){
+        if(topographicMat == null) {
             topographicMat = new Material(Shader.Find("Custom/TopographicMap"));
         }
         topographicMat.SetInteger("debugMode", (int)mapSettings.DebugMode);
@@ -87,7 +115,7 @@ public class TopographicRenderer : MonoBehaviour
         topographicMat.SetColorArray("mapLayers", mapColors);
     }
 
-    public static RenderTexture TemporaryRenderTexture(RenderTexture texture){
+    public static RenderTexture TemporaryRenderTexture(RenderTexture texture) {
         return RenderTexture.GetTemporary(texture.descriptor);
     }
 }

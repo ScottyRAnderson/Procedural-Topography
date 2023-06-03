@@ -7,11 +7,13 @@ public class MapSettings : ScriptableObject
 {
     public enum MapDebugMode
     {
-        CellMap = 0,
-        IndexCellMap = 1,
-        ContourMap = 2,
-        ColorMap = 3,
-        None = 4
+        HeightMap = 0,
+        BlurMap = 1,
+        CellMap = 2,
+        IndexCellMap = 3,
+        ContourMap = 4,
+        ColorMap = 5,
+        None = 6
     }
 
     [SerializeField]

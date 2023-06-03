@@ -6,26 +6,48 @@ using UnityEditor;
 [CustomEditor(typeof(TopographicRenderer))][CanEditMultipleObjects]
 public class TopographicRenderer_Inspector : Editor
 {
-    private SerializedProperty gaussianCompute;
+    private static bool displayAdvanced = true;
+
+    private TopographicRenderer rendererBase;
+
     private SerializedProperty mapSettings;
     private SerializedProperty heightMap;
+    private SerializedProperty gaussianCompute;
+    private SerializedProperty computeResolution;
+    private SerializedProperty kernelSize;
 
     private void OnEnable()
     {
-        gaussianCompute = serializedObject.FindProperty("gaussianCompute");
+        rendererBase = target as TopographicRenderer;
+
         mapSettings = serializedObject.FindProperty("mapSettings");
         heightMap = serializedObject.FindProperty("heightMap");
+        gaussianCompute = serializedObject.FindProperty("gaussianCompute");
+        computeResolution = serializedObject.FindProperty("computeResolution");
+        kernelSize = serializedObject.FindProperty("kernelSize");
     }
 
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
-        if(GUILayout.Button("Dispatch Compute")) {
-            (target as TopographicRenderer).UpdateBlurTexture();
-        }
-        EditorGUILayout.PropertyField(gaussianCompute);
         EditorGUILayout.PropertyField(mapSettings);
         EditorGUILayout.PropertyField(heightMap);
+
+        GUILayout.Space(5f);
+        EditorGUI.indentLevel++;
+        displayAdvanced = EditorHelper.Foldout(displayAdvanced, "Advanced Settings");
+        if (displayAdvanced)
+        {
+            //EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(gaussianCompute);
+            EditorGUILayout.PropertyField(computeResolution);
+            EditorGUILayout.PropertyField(kernelSize);
+
+            if (GUILayout.Button("Force Compute Update")) {
+                rendererBase.UpdateBlurTexture();
+            }
+        }
+        EditorGUI.indentLevel--;
         serializedObject.ApplyModifiedProperties();
     }
 }

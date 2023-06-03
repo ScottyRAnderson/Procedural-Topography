@@ -1,6 +1,5 @@
 #pragma kernel CSMain
-
-static const float PI = 3.1415926538f;
+#include "./Includes/Math.cginc"
 
 RWTexture2D<float4> result;
 
@@ -8,6 +7,8 @@ Texture2D heightMap;
 SamplerState sampler_heightMap;
 float4 heightMap_TexelSize;
 float resolution;
+int kernelSize;
+float sigma;
 
 float gauss(float x, float y, float sigma) {
     return  1.0f / (2.0f * PI * sigma * sigma) * exp(-(x * x + y * y) / (2.0f * sigma * sigma));
@@ -18,19 +19,15 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 {
     float2 coord = float2(id.x / resolution, id.y / resolution);
 
-    //result[id.xy] = float4(x, y, 0, 0);
-
     float4 o = 0;
     float sum = 0;
     float2 uvOffset;
     float weight;
 
-    int KERNEL_SIZE = 15;
-    float _Sigma = 100;
-
-    for (float x = -KERNEL_SIZE / 2; x <= KERNEL_SIZE / 2; x++)
+    // Kernal size divided by 2 on CPU side
+    for (float x = -kernelSize; x <= kernelSize; x++)
     {
-        for (float y = -KERNEL_SIZE / 2; y <= KERNEL_SIZE / 2; y++)
+        for (float y = -kernelSize; y <= kernelSize; y++)
         {
             // Calculate the offset
             uvOffset = coord;
@@ -39,7 +36,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
             uvOffset.y += heightMap_TexelSize.y * y;
 
             // Determine the weights
-            weight = gauss(x, y, _Sigma);
+            weight = gauss(x, y, sigma);
             o += heightMap.SampleLevel(sampler_heightMap, uvOffset, 0) * weight;
             sum += weight;
         }

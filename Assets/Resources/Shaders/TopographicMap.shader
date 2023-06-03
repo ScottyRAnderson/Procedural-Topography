@@ -130,15 +130,18 @@ Shader "Custom/TopographicMap"
                 switch (debugMode)
                 {
                     case 0:
-                        return tex2D(cellData, i.uv).r;
-                        break;
-                    case 1:
-                        return tex2D(cellData, i.uv).g;
+                        return tex2D(heightMap, i.uv);
                         break;
                     case 2:
-                        return luminance(float3(contourData, 0));
+                        return tex2D(cellData, i.uv).r;
                         break;
                     case 3:
+                        return tex2D(cellData, i.uv).g;
+                        break;
+                    case 4:
+                        return luminance(float3(contourData, 0));
+                        break;
+                    case 5:
                         return terrainCol;
                         break;
                 }

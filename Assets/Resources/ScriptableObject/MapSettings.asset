@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 933e8ed15114db042852cef5598bba39, type: 3}
   m_Name: MapSettings
   m_EditorClassIdentifier: 
-  debugMode: 4
+  debugMode: 6
   cellCount: 21
   edgeThreshold: 0
-  contourThreshold: 0.051
+  edgeSmoothness: 100
+  contourThreshold: 0
   contourWidth: 1
   contourColor: {r: 0.65882355, g: 0.54901963, b: 0.41960785, a: 0.36078432}
   indexContour: 5

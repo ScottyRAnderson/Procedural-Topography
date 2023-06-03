@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
-using EasyButtons;
 
 public class HeightMapProcessor : MonoBehaviour
 {
@@ -16,7 +15,6 @@ public class HeightMapProcessor : MonoBehaviour
         return (t - a) / (b - a);
     }
 
-    [Button]
     private void ProcessMap(Texture2D map)
     {
         Texture2D normalizedMap = NormalizeMap(map);
