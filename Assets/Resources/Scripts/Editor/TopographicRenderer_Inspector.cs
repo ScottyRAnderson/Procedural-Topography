@@ -6,7 +6,7 @@ using UnityEditor;
 [CustomEditor(typeof(TopographicRenderer))][CanEditMultipleObjects]
 public class TopographicRenderer_Inspector : Editor
 {
-    private static bool displayAdvanced = true;
+    private static bool displayAdvanced = false;
 
     private TopographicRenderer rendererBase;
 

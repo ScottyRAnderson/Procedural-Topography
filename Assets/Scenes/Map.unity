@@ -219,8 +219,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c0f306df3463f9498b4e9bfee60af38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapSettings: {fileID: 11400000, guid: b562d708be2d3644e82069157704ebac, type: 2}
-  heightMap: {fileID: 2800000, guid: 6769e882193fada4c9ecdaa448ae5385, type: 3}
+  mapSettings: {fileID: 11400000, guid: 21e263896ca046b459dd8eee7b4010cc, type: 2}
+  heightMap: {fileID: 2800000, guid: 11d8ce4ba1371b148bfbedc7ef501dad, type: 3}
   gaussianCompute: {fileID: 7200000, guid: c4f8fc8e91e74ad43b51b846a32998f5, type: 3}
   computeResolution: 3840
   kernelSize: 80
