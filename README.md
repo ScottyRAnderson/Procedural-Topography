@@ -1,5 +1,5 @@
 # Topographic Map
-Procedural topographic map generator based on real-world heightmap data. Sample heightmap data provided including data sampled from Yosemite (California), the Moon, Mars.
+Procedural topographic map generator based on real-world heightmap data. Sample heightmap data provided including data sampled from Yosemite (California), the Moon, and Mars.
 <br>
 Most data taken from [Tangrams Heightmapper](https://tangrams.github.io/heightmapper/)
 

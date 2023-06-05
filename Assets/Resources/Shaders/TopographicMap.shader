@@ -20,6 +20,10 @@ Shader "Custom/TopographicMap"
             };
 
             sampler2D heightMap;
+
+            sampler2D heightMapBlur;
+            float4 heightMapBlur_TexelSize;
+
             sampler2D cellData;
             float4 cellData_TexelSize;
 
@@ -41,6 +45,23 @@ Shader "Custom/TopographicMap"
                 o.uv = v.texcoord.xy;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 return o;
+            }
+
+            float gradient(float2 uv)
+            {
+                float gradientAverage = 50;
+
+                float height = tex2D(heightMapBlur, uv);
+                float x = heightMapBlur_TexelSize.x;
+                float y = heightMapBlur_TexelSize.y;
+
+                // Compute the differentials by stepping over 1 in both directions.
+                float dx = tex2D(heightMapBlur, uv + float2(x * gradientAverage, 0)) - height;
+                float dy = tex2D(heightMapBlur, uv + float2(0, y * gradientAverage)) - height;
+            
+                // The "steepness" is the magnitude of the gradient vector
+                // For a faster but not as accurate computation, you can just use abs(dx) + abs(dy)
+                return sqrt(dx * dx + dy * dy);
             }
 
             // Identify contour lines through edge detection
@@ -107,6 +128,7 @@ Shader "Custom/TopographicMap"
             {
                 // Identify contour lines
                 float2 contourData = findContours(i.uv);
+                float gradientData = gradient(i.uv);
 
                 // Unpack contour data
                 bool isIndexContour = contourData.g < 1;
@@ -145,6 +167,13 @@ Shader "Custom/TopographicMap"
                         return terrainCol;
                         break;
                 }
+
+                gradientData = 1 - gradientData;
+                gradientData = pow(gradientData, 2);
+                if(mapHeight < contourThreshold) {
+                    gradientData = 1;
+                }
+                terrainCol *= gradientData;
 
                 // Attenuate contour lines based on if it's an index or not
                 float contourStrength = ((isContour ? 1 : 0) * (isIndexContour ? indexStrength : contourColor.a)) * (mapHeight < contourThreshold ? 0 : 1);

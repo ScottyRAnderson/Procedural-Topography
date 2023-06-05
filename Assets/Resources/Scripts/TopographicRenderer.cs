@@ -59,6 +59,7 @@ public class TopographicRenderer : MonoBehaviour
         Graphics.Blit(source, contourTex, contourMat);
         
         topographicMat.SetTexture("cellData", contourTex);
+        topographicMat.SetTexture("heightMapBlur", blurTex);
         RenderTexture.ReleaseTemporary(contourTex);
         Graphics.Blit(source, destination, topographicMat);
     }
