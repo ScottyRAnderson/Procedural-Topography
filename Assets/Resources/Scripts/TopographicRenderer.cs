@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 [ExecuteInEditMode][RequireComponent(typeof(Camera))]
 public class TopographicRenderer : MonoBehaviour
@@ -28,6 +29,9 @@ public class TopographicRenderer : MonoBehaviour
     private Material contourMat;
     private Material topographicMat;
     private RenderTexture blurTex;
+
+    [SerializeField]
+    private Texture2D contourData;
 
     private void Awake() {
         UpdateBlurTexture();
@@ -58,6 +62,16 @@ public class TopographicRenderer : MonoBehaviour
         RenderTexture contourTex = TemporaryRenderTexture(source);
         Graphics.Blit(source, contourTex, contourMat);
         
+        // Capture contour data
+        // Cannot simply use Graphics.copy here as this is not asynchronous, i.e. cannot copy data from GPU to CPU
+        // .ReadPixels however allows GPU read-back, although this is a slow procedure so should be used only when necessary
+        if(contourData == null) {
+            contourData = new Texture2D(contourTex.width, contourTex.height, TextureFormat.RGB24, false);
+            Rect regionToReadFrom = new Rect(0, 0, contourTex.width, contourTex.height);
+            contourData.ReadPixels(regionToReadFrom, 0, 0, false);
+            contourData.Apply();
+        }
+        
         topographicMat.SetTexture("cellData", contourTex);
         topographicMat.SetTexture("heightMapBlur", blurTex);
         RenderTexture.ReleaseTemporary(contourTex);
@@ -71,7 +85,7 @@ public class TopographicRenderer : MonoBehaviour
         blurTex.enableRandomWrite = true;
         blurTex.Create();
 
-        Vector4 heightMap_TexelSize = new Vector4(1.0f / heightMap.width, 1.0f / heightMap.height, heightMap.width, heightMap.height);
+        Vector4 heightMap_TexelSize = new Vector4(1f / heightMap.width, 1f / heightMap.height, heightMap.width, heightMap.height);
         gaussianCompute.SetTexture(0, "result", blurTex);
         gaussianCompute.SetTexture(0, "heightMap", heightMap);
         gaussianCompute.SetVector("heightMap_TexelSize", heightMap_TexelSize);
@@ -117,7 +131,113 @@ public class TopographicRenderer : MonoBehaviour
         topographicMat.SetColorArray("mapLayers", mapColors);
     }
 
-    public static RenderTexture TemporaryRenderTexture(RenderTexture texture) {
+    private static RenderTexture TemporaryRenderTexture(RenderTexture texture) {
         return RenderTexture.GetTemporary(texture.descriptor);
+    }
+
+    // Index contour text tag generation
+    public void UpdateContourText()
+    {
+        if(contourData == null) {
+            return;
+        }
+
+        List<contourPos> textPositions = IdentifyTextPositions(contourData);
+
+        // We don't want all the positions here as there are too many...
+
+        for (int i = 0; i < textPositions.Count; i++)
+        {
+            contourPos position = textPositions[i];
+            position.FilterPoints(5);
+        }
+    }
+
+    private List<contourPos> IdentifyTextPositions(Texture2D contourData)
+    {
+        List<contourPos> positions = new List<contourPos>();
+
+        // Sobel edge detection
+        for (int i = 0, j = contourData.width; i < j; i += 1) {
+            for (int k = 0, l = contourData.height; k < l; k += 1) {
+                Color pixel = contourData.GetPixel(i, k);
+
+                // Index contours packed into green channel
+                //float g = pixel.g;
+
+                Color cell00 = contourData.GetPixel(i + (-1), k + (1));
+                Color cell01 = contourData.GetPixel(i + (-1), k + (0));
+                Color cell02 = contourData.GetPixel(i + (-1), k + (-1));
+                Color cell03 = contourData.GetPixel(i + (0), k + (1));
+                Color cell04 = contourData.GetPixel(i + (0), k + (-1));
+                Color cell05 = contourData.GetPixel(i + (1), k + (1));
+                Color cell06 = contourData.GetPixel(i + (1), k + (0));
+                Color cell07 = contourData.GetPixel(i + (1), k + (-1));
+
+                // Evaluate green channel edges
+                float s00 = cell00.g;
+                float s10 = cell01.g;
+                float s20 = cell02.g;
+                float s01 = cell03.g;
+                float s21 = cell04.g;
+                float s02 = cell05.g;
+                float s12 = cell06.g;
+                float s22 = cell07.g;
+                
+                float sx = s00 + 2 * s10 + s20 - (s02 + 2 * s12 + s22);
+                float sy = s00 + 2 * s01 + s02 - (s20 + 2 * s21 + s22);
+                float g = sx * sx + sy * sy;
+                if (g > 0.1f) {
+                    float height = pixel.g;
+                    Vector2 point = new Vector2(i, k);
+                    contourPos pos = null;
+
+                    for (int p = 0; p < positions.Count; p++)
+                    {
+                        if(positions[p].ContourHeight == height){
+                            pos = positions[p];
+                        }
+                    }
+
+                    if(pos == null) {
+                        positions.Add(new contourPos(height, point));
+                    }
+                    else {
+                        pos.AddPoint(point);
+                    }
+                }
+            }
+        }
+        return positions;
+    }
+
+    private class contourPos
+    {
+        private float contourHeight;
+        private List<Vector2> points;
+
+        public float ContourHeight{ get { return contourHeight; } }
+        public List<Vector2> Points { get { return points; } }
+
+        public contourPos(float contourHeight, Vector2 initialPoint)
+        {
+            this.contourHeight = contourHeight;
+            points = new List<Vector2>();
+            AddPoint(initialPoint);
+        }
+
+        public void AddPoint(Vector2 point) {
+            points.Add(point);
+        }
+
+        public void FilterPoints(float target)
+        {
+            List<Vector2> filteredPoints = new List<Vector2>();
+            int increment = (int)(points.Count / target);
+            for (int i = 0; i < points.Count; i += increment){
+                filteredPoints.Add(points[i]);
+            }
+            points = filteredPoints;
+        }
     }
 }

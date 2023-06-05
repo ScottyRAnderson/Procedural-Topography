@@ -16,6 +16,8 @@ public class TopographicRenderer_Inspector : Editor
     private SerializedProperty computeResolution;
     private SerializedProperty kernelSize;
 
+    private SerializedProperty contourData;
+
     private void OnEnable()
     {
         rendererBase = target as TopographicRenderer;
@@ -25,6 +27,8 @@ public class TopographicRenderer_Inspector : Editor
         gaussianCompute = serializedObject.FindProperty("gaussianCompute");
         computeResolution = serializedObject.FindProperty("computeResolution");
         kernelSize = serializedObject.FindProperty("kernelSize");
+
+        contourData = serializedObject.FindProperty("contourData");
     }
 
     public override void OnInspectorGUI()
@@ -32,6 +36,8 @@ public class TopographicRenderer_Inspector : Editor
         serializedObject.Update();
         EditorGUILayout.PropertyField(mapSettings);
         EditorGUILayout.PropertyField(heightMap);
+
+        EditorGUILayout.PropertyField(contourData);
 
         GUILayout.Space(5f);
         EditorGUI.indentLevel++;
@@ -45,6 +51,10 @@ public class TopographicRenderer_Inspector : Editor
 
             if (GUILayout.Button("Force Compute Update")) {
                 rendererBase.UpdateBlurTexture();
+            }
+
+            if (GUILayout.Button("Update Contour Text")) {
+                rendererBase.UpdateContourText();
             }
         }
         EditorGUI.indentLevel--;

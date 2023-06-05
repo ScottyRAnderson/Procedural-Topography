@@ -25,7 +25,7 @@ public class HeightMapProcessor : MonoBehaviour
         MeshRenderer.material = new Material(Shader.Find("Mobile/Unlit (Supports Lightmap)"));
         MeshRenderer.sharedMaterial.mainTexture = normalizedMap;
 
-        //then Save To Disk as PNG
+        // Save To Disk as PNG
         byte[] bytes = normalizedMap.EncodeToPNG();
         var dirPath = Application.dataPath + "/../SaveImages/";
         if (!Directory.Exists(dirPath)){
