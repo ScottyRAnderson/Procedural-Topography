@@ -21,7 +21,7 @@ MonoBehaviour:
   contourColor: {r: 0.3301887, g: 0.3301887, b: 0.3301887, a: 0.36078432}
   indexContour: 5
   indexStrength: 0.808
-  gradientShading: 2
+  gradientShading: 8
   gradientAverage: 50
   mapLayers:
   - threshold: 0.085
