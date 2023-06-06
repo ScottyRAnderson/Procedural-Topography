@@ -12,8 +12,9 @@ public class MapSettings : ScriptableObject
         CellMap = 2,
         IndexCellMap = 3,
         ContourMap = 4,
-        ColorMap = 5,
-        None = 6
+        SteepnessMap = 5,
+        ColorMap = 6,
+        None = 7
     }
 
     [SerializeField]
@@ -44,6 +45,11 @@ public class MapSettings : ScriptableObject
     [SerializeField][Range(0f, 1f)]
     private float indexStrength = 1f;
 
+    [SerializeField]
+    private float gradientShading = 2f;
+    [SerializeField]
+    private float gradientAverage = 50f;
+
     [Space]
 
     [SerializeField]
@@ -62,6 +68,9 @@ public class MapSettings : ScriptableObject
     public int IndexContour { get { return indexContour; } }
     public float IndexStrength { get { return indexStrength; } }
 
+    public float GradientShading { get { return gradientShading; } }
+    public float GradientAverage { get { return gradientAverage; } }
+
     public MapLayer[] MapLayers { get { return mapLayers; } }
 
     private void OnValidate()
@@ -70,6 +79,8 @@ public class MapSettings : ScriptableObject
         edgeSmoothness = Mathf.Max(edgeSmoothness, 0f);
         contourWidth = Mathf.Max(contourWidth, 0);
         indexContour = Mathf.Max(indexContour, 0);
+        gradientShading = Mathf.Max(gradientShading, 0f);
+        gradientAverage = Mathf.Max(gradientAverage, 0f);
         if(mapLayers.Length > 20){
             System.Array.Resize(ref mapLayers, 20);
         }

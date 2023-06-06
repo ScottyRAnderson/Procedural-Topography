@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
+using TMPro;
 
 [ExecuteInEditMode][RequireComponent(typeof(Camera))]
 public class TopographicRenderer : MonoBehaviour
@@ -25,13 +25,17 @@ public class TopographicRenderer : MonoBehaviour
     private ComputeResolution computeResolution = ComputeResolution.Res_1080;
     [SerializeField]
     private int kernelSize = 27;
+    [SerializeField]
+    private Canvas labelCanvas;
+    [SerializeField]
+    private TextMeshProUGUI labelText;
 
     private Material contourMat;
     private Material topographicMat;
     private RenderTexture blurTex;
 
-    [SerializeField]
     private Texture2D contourData;
+    private bool updateContourData;
 
     private void Awake() {
         UpdateBlurTexture();
@@ -62,14 +66,17 @@ public class TopographicRenderer : MonoBehaviour
         RenderTexture contourTex = TemporaryRenderTexture(source);
         Graphics.Blit(source, contourTex, contourMat);
         
-        // Capture contour data
-        // Cannot simply use Graphics.copy here as this is not asynchronous, i.e. cannot copy data from GPU to CPU
-        // .ReadPixels however allows GPU read-back, although this is a slow procedure so should be used only when necessary
-        if(contourData == null) {
+        // Capture contour data for CPU work
+        if(updateContourData) {
+            updateContourData = false;
             contourData = new Texture2D(contourTex.width, contourTex.height, TextureFormat.RGB24, false);
             Rect regionToReadFrom = new Rect(0, 0, contourTex.width, contourTex.height);
+
+            // Cannot simply use Graphics.copy here as this is not asynchronous, i.e. cannot copy data from GPU to CPU
+            // .ReadPixels however allows GPU read-back, although this is a slow procedure so should be used only when necessary
             contourData.ReadPixels(regionToReadFrom, 0, 0, false);
             contourData.Apply();
+            UpdateContourText();
         }
         
         topographicMat.SetTexture("cellData", contourTex);
@@ -114,6 +121,8 @@ public class TopographicRenderer : MonoBehaviour
         topographicMat.SetColor("contourColor", mapSettings.ContourColor);
 
         topographicMat.SetFloat("indexStrength", mapSettings.IndexStrength);
+        topographicMat.SetFloat("gradientShading", mapSettings.GradientShading);
+        topographicMat.SetFloat("gradientAverage", mapSettings.GradientAverage);
         topographicMat.SetTexture("heightMap", heightMap);
 
         MapLayer[] mapLayers = mapSettings.MapLayers;
@@ -135,21 +144,40 @@ public class TopographicRenderer : MonoBehaviour
         return RenderTexture.GetTemporary(texture.descriptor);
     }
 
-    // Index contour text tag generation
+    // Index contour text tag generation (Experimental)
+    public void SetShouldUpdateLabels() {
+        updateContourData = true;
+    }
+
     public void UpdateContourText()
     {
         if(contourData == null) {
             return;
         }
 
+        for (int i = labelCanvas.transform.childCount - 1; i >= 0; i--)
+        {
+            TextMeshProUGUI label = labelCanvas.transform.GetChild(i).GetComponent<TextMeshProUGUI>();
+            if (!label){
+                continue;
+            }
+            DestroyImmediate(label.gameObject);
+        }
+
         List<contourPos> textPositions = IdentifyTextPositions(contourData);
 
         // We don't want all the positions here as there are too many...
-
         for (int i = 0; i < textPositions.Count; i++)
         {
             contourPos position = textPositions[i];
-            position.FilterPoints(5);
+            position.FilterPoints(25);
+            for (int j = 0; j < position.Points.Count; j++)
+            {
+                Vector2 point = position.Points[j];
+                TextMeshProUGUI labelInstance = Instantiate(labelText);
+                labelInstance.transform.SetParent(labelCanvas.transform);
+                labelInstance.transform.position = new Vector3(point.x, point.y, 0f);
+            }
         }
     }
 
@@ -160,11 +188,6 @@ public class TopographicRenderer : MonoBehaviour
         // Sobel edge detection
         for (int i = 0, j = contourData.width; i < j; i += 1) {
             for (int k = 0, l = contourData.height; k < l; k += 1) {
-                Color pixel = contourData.GetPixel(i, k);
-
-                // Index contours packed into green channel
-                //float g = pixel.g;
-
                 Color cell00 = contourData.GetPixel(i + (-1), k + (1));
                 Color cell01 = contourData.GetPixel(i + (-1), k + (0));
                 Color cell02 = contourData.GetPixel(i + (-1), k + (-1));
@@ -188,14 +211,15 @@ public class TopographicRenderer : MonoBehaviour
                 float sy = s00 + 2 * s01 + s02 - (s20 + 2 * s21 + s22);
                 float g = sx * sx + sy * sy;
                 if (g > 0.1f) {
-                    float height = pixel.g;
+                    float height = contourData.GetPixel(i, k).g;
                     Vector2 point = new Vector2(i, k);
                     contourPos pos = null;
 
                     for (int p = 0; p < positions.Count; p++)
                     {
-                        if(positions[p].ContourHeight == height){
+                        if(positions[p].ContourHeight < height + 0.25f && positions[p].ContourHeight > height - 0.25f){ // positions[p].ContourHeight == height
                             pos = positions[p];
+                            height = positions[p].ContourHeight;
                         }
                     }
 
@@ -237,6 +261,16 @@ public class TopographicRenderer : MonoBehaviour
             for (int i = 0; i < points.Count; i += increment){
                 filteredPoints.Add(points[i]);
             }
+            points = new List<Vector2>(filteredPoints);
+
+            for (int i = 0; i < points.Count; i++){
+                for (int j = filteredPoints.Count - 1; j >= 0; j--){
+                    if(points[i] != filteredPoints[j] && Vector2.Distance(points[i], filteredPoints[j]) < 200f) {
+                        filteredPoints.RemoveAt(j);
+                    }
+                }
+            }
+
             points = filteredPoints;
         }
     }

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 933e8ed15114db042852cef5598bba39, type: 3}
   m_Name: MapSettings_Mars
   m_EditorClassIdentifier: 
-  debugMode: 6
+  debugMode: 7
   cellCount: 110
   edgeThreshold: 0
   edgeSmoothness: 15
@@ -21,6 +21,8 @@ MonoBehaviour:
   contourColor: {r: 0, g: 0, b: 0, a: 0.36078432}
   indexContour: 5
   indexStrength: 0.808
+  gradientShading: 2
+  gradientAverage: 50
   mapLayers:
   - threshold: 0.085
     layerColor: {r: 0.21960786, g: 0.20392159, b: 0.24313727, a: 1}

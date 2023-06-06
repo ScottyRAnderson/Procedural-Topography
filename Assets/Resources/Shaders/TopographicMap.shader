@@ -33,6 +33,9 @@ Shader "Custom/TopographicMap"
             int contourWidth;
             float indexStrength;
 
+            float gradientShading;
+            float gradientAverage;
+
             int numMapLayers;
             float mapThresholds[20];
             float4 mapLayers[20];
@@ -49,8 +52,6 @@ Shader "Custom/TopographicMap"
 
             float gradient(float2 uv)
             {
-                float gradientAverage = 50;
-
                 float height = tex2D(heightMapBlur, uv);
                 float x = heightMapBlur_TexelSize.x;
                 float y = heightMapBlur_TexelSize.y;
@@ -128,7 +129,6 @@ Shader "Custom/TopographicMap"
             {
                 // Identify contour lines
                 float2 contourData = findContours(i.uv);
-                float gradientData = gradient(i.uv);
 
                 // Unpack contour data
                 bool isIndexContour = contourData.g < 1;
@@ -148,6 +148,13 @@ Shader "Custom/TopographicMap"
                     }
                 }
 
+                // Isolate and shade heightmap steepness
+                float gradientData = gradient(i.uv);
+                gradientData = pow(1 - gradientData, gradientShading);
+                if(mapHeight < contourThreshold) {
+                    gradientData = 1;
+                }
+
                 // Handle debugging
                 switch (debugMode)
                 {
@@ -164,15 +171,14 @@ Shader "Custom/TopographicMap"
                         return luminance(float3(contourData, 0));
                         break;
                     case 5:
+                        return gradientData;
+                        break;
+                    case 6:
                         return terrainCol;
                         break;
                 }
 
-                gradientData = 1 - gradientData;
-                gradientData = pow(gradientData, 2);
-                if(mapHeight < contourThreshold) {
-                    gradientData = 1;
-                }
+                // Contribute gradient shading
                 terrainCol *= gradientData;
 
                 // Attenuate contour lines based on if it's an index or not
