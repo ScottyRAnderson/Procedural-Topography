@@ -19,6 +19,20 @@ Shader "Custom/TopographicMap"
                 float4 vertex : SV_POSITION;
             };
 
+            // Vertical Sobel kernel
+            static const float3x3 kernel_x = float3x3 (
+                1, 0, -1,
+                2, 0, -2,
+                1, 0, -1
+            );
+
+            // Horizontal Sobel kernel
+            static const float3x3 kernel_y = float3x3 (
+                1, 2, 1,
+                0, 0, 0,
+                -1, -2, -1
+            );
+
             sampler2D heightMap;
 
             sampler2D heightMapBlur;
@@ -65,6 +79,30 @@ Shader "Custom/TopographicMap"
                 return sqrt(dx * dx + dy * dy);
             }
 
+            // Computes a simple 3x3 image convolution for a given kernel and pixel matrix
+            float convolve(float3x3 pixels, float3x3 kernel)
+            {
+                float sum = 0;
+                for (int x = 0; x < 3; x++)
+                {  
+                    for(int y = 0; y < 3; y++)
+                    {
+                        float kern = kernel[x][y];
+                        float pixel = pixels[x][y];
+                        sum += kern * pixel;
+                    }
+                }
+                return sum;
+            }
+
+            // If returned value is high, an edge may exist for the given pixel matrix
+            float sobel(float3x3 pixels)
+            {
+                float sx = convolve(pixels, kernel_x);
+                float sy = convolve(pixels, kernel_y);
+                return sqrt(pow(sx, 2) + pow(sy, 2));
+            }
+
             // Identify contour lines through edge detection
             // Implements Sobel Opertor edge detection
             // Implementation Reference: https://homepages.inf.ed.ac.uk/rbf/HIPR2/sobel.htm
@@ -75,6 +113,7 @@ Shader "Custom/TopographicMap"
                 float y = cellData_TexelSize.y;
                 for (int w = 0; w < contourWidth; w++)
                 {
+                    // Retrieve colour data for 8 surrounding pixels
                     float4 cell00 = tex2D(cellData, uv + float2(-x, y));
                     float4 cell01 = tex2D(cellData, uv + float2(-x, 0));
                     float4 cell02 = tex2D(cellData, uv + float2(-x, -y));
@@ -83,38 +122,35 @@ Shader "Custom/TopographicMap"
                     float4 cell05 = tex2D(cellData, uv + float2(x, y));
                     float4 cell06 = tex2D(cellData, uv + float2(x, 0));
                     float4 cell07 = tex2D(cellData, uv + float2(x, -y));
+
+                    // Compute luminance values for pixels
+                    // Normal contours held in red channel, index contours held in green channel
+                    float2 s00 = float2(luminance(cell00.r), luminance(cell00.g));
+                    float2 s10 = float2(luminance(cell01.r), luminance(cell01.g));
+                    float2 s20 = float2(luminance(cell02.r), luminance(cell02.g));
+                    float2 s01 = float2(luminance(cell03.r), luminance(cell03.g));
+                    float2 s21 = float2(luminance(cell04.r), luminance(cell04.g));
+                    float2 s02 = float2(luminance(cell05.r), luminance(cell05.g));
+                    float2 s12 = float2(luminance(cell06.r), luminance(cell06.g));
+                    float2 s22 = float2(luminance(cell07.r), luminance(cell07.g));
+
+                    // Declare pixel matricies
+                    float3x3 pixels_r = float3x3 (
+                        s00.x, s01.x, s02.x,
+                        s10.x, 0, s12.x,
+                        s20.x, s21.x, s22.x
+                    );
+                    float3x3 pixels_g = float3x3 (
+                        s00.y, s01.y, s02.y,
+                        s10.y, 0, s12.y,
+                        s20.y, s21.y, s22.y
+                    );
                     
-                    // Evaluate red channel edges
-                    float s00 = luminance(cell00.r);
-                    float s10 = luminance(cell01.r);
-                    float s20 = luminance(cell02.r);
-                    float s01 = luminance(cell03.r);
-                    float s21 = luminance(cell04.r);
-                    float s02 = luminance(cell05.r);
-                    float s12 = luminance(cell06.r);
-                    float s22 = luminance(cell07.r);
-                    
-                    float sx = s00 + 2 * s10 + s20 - (s02 + 2 * s12 + s22);
-                    float sy = s00 + 2 * s01 + s02 - (s20 + 2 * s21 + s22);
-                    float g = sx * sx + sy * sy;
-                    if (g > edgeThreshold) {
+                    // Carry out Sobel Edge Detection
+                    if (sobel(pixels_r) > edgeThreshold) {
                         contourData.r = 0;
                     }
-                    
-                    // Evaluate green channel edges
-                    s00 = luminance(cell00.g);
-                    s10 = luminance(cell01.g);
-                    s20 = luminance(cell02.g);
-                    s01 = luminance(cell03.g);
-                    s21 = luminance(cell04.g);
-                    s02 = luminance(cell05.g);
-                    s12 = luminance(cell06.g);
-                    s22 = luminance(cell07.g);
-                    
-                    sx = s00 + 2 * s10 + s20 - (s02 + 2 * s12 + s22);
-                    sy = s00 + 2 * s01 + s02 - (s20 + 2 * s21 + s22);
-                    g = sx * sx + sy * sy;
-                    if (g > edgeThreshold) {
+                    if (sobel(pixels_g) > edgeThreshold) {
                         contourData.g = 0;
                     }
 

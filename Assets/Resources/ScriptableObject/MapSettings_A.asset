@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 933e8ed15114db042852cef5598bba39, type: 3}
   m_Name: MapSettings_A
   m_EditorClassIdentifier: 
-  debugMode: 7
+  debugMode: 4
   cellCount: 21
   edgeThreshold: 0
   edgeSmoothness: 100
