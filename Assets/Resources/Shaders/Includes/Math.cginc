@@ -36,3 +36,7 @@ float4 toLinear(float4 col) {
 float4 toGamma(float4 col) {
 	return pow(col, 0.4545);
 }
+
+float pythagoras(float a, float b) {
+	return sqrt(pow(a, 2) + pow(b, 2));
+}

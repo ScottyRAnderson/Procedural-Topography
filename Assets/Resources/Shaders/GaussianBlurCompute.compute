@@ -11,7 +11,8 @@ int kernelSize;
 float sigma;
 
 float gauss(float x, float y, float sigma) {
-    return  1.0f / (2.0f * PI * sigma * sigma) * exp(-(x * x + y * y) / (2.0f * sigma * sigma));
+    float sigmaSq = pow(sigma, 2);
+    return 1 / (2 * PI * sigmaSq) * exp(-(pow(x, 2) + pow(y, 2)) / (2 * sigmaSq));
 }
 
 [numthreads(8,8,1)]

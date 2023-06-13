@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 933e8ed15114db042852cef5598bba39, type: 3}
+  m_Name: MountEverest
+  m_EditorClassIdentifier: 
+  debugMode: 7
+  cellCount: 25
+  edgeThreshold: 0.005
+  edgeSmoothness: 100
+  contourThreshold: 0
+  contourWidth: 1
+  contourColor: {r: 0.5188679, g: 0.5188679, b: 0.5188679, a: 0.36078432}
+  indexContour: 5
+  indexStrength: 0.8
+  gradientShading: 3.5
+  gradientAverage: 50
+  mapLayers:
+  - threshold: 0.033
+    layerColor: {r: 0.85882354, g: 0.85882354, b: 0.85882354, a: 1}
+  - threshold: 0.03619999
+    layerColor: {r: 0.754717, g: 0.754717, b: 0.754717, a: 1}
+  - threshold: 0.066
+    layerColor: {r: 0.9528302, g: 0.9528302, b: 0.9528302, a: 1}
+  - threshold: 0.089
+    layerColor: {r: 0.9339623, g: 0.9339623, b: 0.9339623, a: 1}
+  - threshold: 0.286
+    layerColor: {r: 0.9245283, g: 0.9245283, b: 0.9245283, a: 1}
+  - threshold: 0.521
+    layerColor: {r: 0.9716981, g: 0.9716981, b: 0.9716981, a: 1}
+  - threshold: 1
+    layerColor: {r: 1, g: 1, b: 1, a: 1}

@@ -70,13 +70,12 @@ Shader "Custom/TopographicMap"
                 float x = heightMapBlur_TexelSize.x;
                 float y = heightMapBlur_TexelSize.y;
 
-                // Compute the differentials by stepping over 1 in both directions.
+                // Compute the differentials by stepping over 1 in both directions
                 float dx = tex2D(heightMapBlur, uv + float2(x * gradientAverage, 0)) - height;
                 float dy = tex2D(heightMapBlur, uv + float2(0, y * gradientAverage)) - height;
             
-                // The "steepness" is the magnitude of the gradient vector
-                // For a faster but not as accurate computation, you can just use abs(dx) + abs(dy)
-                return sqrt(dx * dx + dy * dy);
+                // Calculate steepness as the magnitude of the gradient vector
+                return pythagoras(dx, dy);
             }
 
             // Computes a simple 3x3 image convolution for a given kernel and pixel matrix
@@ -85,11 +84,8 @@ Shader "Custom/TopographicMap"
                 float sum = 0;
                 for (int x = 0; x < 3; x++)
                 {  
-                    for(int y = 0; y < 3; y++)
-                    {
-                        float kern = kernel[x][y];
-                        float pixel = pixels[x][y];
-                        sum += kern * pixel;
+                    for(int y = 0; y < 3; y++){
+                        sum += kernel[x][y] * pixels[x][y];
                     }
                 }
                 return sum;
@@ -100,12 +96,12 @@ Shader "Custom/TopographicMap"
             {
                 float sx = convolve(pixels, kernel_x);
                 float sy = convolve(pixels, kernel_y);
-                return sqrt(pow(sx, 2) + pow(sy, 2));
+                return pythagoras(sx, sy);
             }
 
             // Identify contour lines through edge detection
             // Implements Sobel Opertor edge detection
-            // Implementation Reference: https://homepages.inf.ed.ac.uk/rbf/HIPR2/sobel.htm
+            // Implementation Reference: https://en.wikipedia.org/wiki/Sobel_operator
             float2 findContours(float2 uv)
             {
                 float2 contourData = 1;

@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: MapSettings_Mars
   m_EditorClassIdentifier: 
   debugMode: 7
-  cellCount: 110
-  edgeThreshold: 0
+  cellCount: 100
+  edgeThreshold: 0.005
   edgeSmoothness: 15
   contourThreshold: 0
   contourWidth: 1
@@ -36,5 +36,7 @@ MonoBehaviour:
     layerColor: {r: 0.91372555, g: 0.65882355, b: 0.43921572, a: 1}
   - threshold: 0.235
     layerColor: {r: 0.9339623, g: 0.709137, b: 0.5154415, a: 1}
-  - threshold: 1
+  - threshold: 0.3
     layerColor: {r: 0.82745105, g: 0.5686275, b: 0.43529415, a: 1}
+  - threshold: 1
+    layerColor: {r: 0.8962264, g: 0.68849665, b: 0.57916516, a: 1}

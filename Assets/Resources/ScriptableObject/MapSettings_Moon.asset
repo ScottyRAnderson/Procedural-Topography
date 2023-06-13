@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   debugMode: 7
   cellCount: 50
-  edgeThreshold: 0
+  edgeThreshold: 0.005
   edgeSmoothness: 100
   contourThreshold: 0
   contourWidth: 1
