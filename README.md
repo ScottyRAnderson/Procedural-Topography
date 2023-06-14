@@ -13,9 +13,9 @@ Most data taken from [Tangrams Heightmapper](https://tangrams.github.io/heightma
 * **Exposed Parameters**
 <br> All parameters contributing to the final image are serialized to allow fast modification of colours, heights, contour data, etc... Heightmaps may be provided to the system as .png or .jpg
 
-## Development Video
-Below is a development video detailing the creation process of this system,
-<br>[Procedural Topography](https://www.youtube.com/watch?v=t89De819YMA)
+## Development Case-Study
+Below is a development case-study detailing the creation process of this system,
+<br>[Procedural Topography](https://scottanderson.uk/work/procedural-topography)
 
 ![TopographicMapA](https://raw.githubusercontent.com/ScottyRAnderson/Images/master/topographic-map_feature_1.jpg)
 ![TopographicMapB](https://raw.githubusercontent.com/ScottyRAnderson/Images/master/topographic-map_feature_2.jpg)
